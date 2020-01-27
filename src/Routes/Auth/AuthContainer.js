@@ -11,11 +11,12 @@ export default () => {
   const firstName = useInput("");
   const lastName = useInput("");
   const email = useInput("");
+  const secret = useInput("");
 
-  const [requestSecret] = useMutation(LOG_IN, {
+  const [requestSecretMutation] = useMutation(LOG_IN, {
     variables: { email: email.value }
   });
-  const [createAccount] = useMutation(CREATE_ACCOUNT, {
+  const [createAccountMutation] = useMutation(CREATE_ACCOUNT, {
   variables: {
       email: email.value,
       username: username.value,
@@ -29,11 +30,14 @@ export default () => {
     if (action === "logIn") {
       if (email.value !== "") {
         try {
-          const requestSecret_data  = await requestSecret();
-          console.log(requestSecret_data.data.requestSecret);
-          if (!requestSecret_data.data.requestSecret) {
+          const {data:{requestSecret}}  = await requestSecretMutation();
+          console.log(requestSecret);
+          if (!requestSecret) {
             toast.error("You dont have an account yet, create one");
             setTimeout( () => setAction("signUp", 3000));
+          } else {
+            toast.success("Check your inbox for your login secret");
+            setAction("confirm");
           }
         }
         catch {
@@ -50,9 +54,8 @@ export default () => {
         lastName.value !== ""
       ) {
         try {
-          const createAccount_data = await createAccount();
-          console.log(createAccount_data.data.createAccount)
-          if (!createAccount_data.data.createAccount) {
+          const {data:{createAccount}} = await createAccountMutation();
+          if (!createAccount) {
             toast.error("Cant create Account");
           } else {
             toast.success("Account created Log In now");
@@ -76,6 +79,7 @@ export default () => {
       lastName={lastName}
       email={email}
       onSubmit={onSubmit}
+      secret={secret}
     />
   );
 };
