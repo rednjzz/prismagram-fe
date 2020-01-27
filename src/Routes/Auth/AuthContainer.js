@@ -13,17 +13,10 @@ export default () => {
   const email = useInput("");
 
   const [requestSecret] = useMutation(LOG_IN, {
-    update: (_, { data }) => {
-      const { requestSecret } = data;
-      if (!requestSecret) {
-        toast.error("You dont have an account yet, create one");
-        setTimeout( () => setAction("signUp"), 3000);
-      }
-    },
     variables: { email: email.value }
   });
   const [createAccount] = useMutation(CREATE_ACCOUNT, {
-    variables: {
+  variables: {
       email: email.value,
       username: username.value,
       firsName: firstName.value,
@@ -31,11 +24,21 @@ export default () => {
     }
   });
 
-  const onSubmit = e => {
+  const onSubmit = async e => {
     e.preventDefault();
     if (action === "logIn") {
       if (email.value !== "") {
-        requestSecret();
+        try {
+          const requestSecret_data  = await requestSecret();
+          console.log(requestSecret_data.data.requestSecret);
+          if (!requestSecret_data.data.requestSecret) {
+            toast.error("You dont have an account yet, create one");
+            setTimeout( () => setAction("signUp", 3000));
+          }
+        }
+        catch {
+          toast.error("Cant request secret, try again");
+        }
       } else {
         toast.error("Email is required");
       }
@@ -46,7 +49,18 @@ export default () => {
         firstName.value !== "" &&
         lastName.value !== ""
       ) {
-        createAccount();
+        try {
+          const createAccount_data = await createAccount();
+          console.log(createAccount_data.data.createAccount)
+          if (!createAccount_data.data.createAccount) {
+            toast.error("Cant create Account");
+          } else {
+            toast.success("Account created Log In now");
+            setTimeout( () => setAction("login"), 3000);
+          }
+        } catch(e) {
+          toast.error(e.message);
+        }
       } else {
         toast.error("All field are required");
       }
