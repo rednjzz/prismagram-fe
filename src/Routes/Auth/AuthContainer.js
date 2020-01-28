@@ -44,7 +44,7 @@ export default () => {
       if (email.value !== "") {
         try {
           const {data:{requestSecret}}  = await requestSecretMutation();
-          console.log(requestSecret);
+          // console.log(requestSecret);
           if (!requestSecret) {
             toast.error("You dont have an account yet, create one");
             setTimeout( () => setAction("signUp", 3000));
@@ -69,7 +69,7 @@ export default () => {
         try {
           const {data:{createAccount}} = await createAccountMutation();
           if (!createAccount) {
-            toast.error("Cant create Account");
+            toast.error("이미 존재하는 계정, 계정을 생성할수 없습니다");
           } else {
             toast.success("Account created Log In now");
             setTimeout( () => setAction("login"), 3000);
